@@ -79,10 +79,11 @@
         canvas.window = CANVAS_WIDTH;
         canvas.height = CANVAS_HEIGHT;
 
-        viper = new Viper(ctx, 0 ,0, image);
+        viper = new Viper(ctx, 0 ,0, 64, 64, image);
+        // 登場シーンから開始させる
         viper.setComing(
           CANVAS_WIDTH / 2,
-          CANVAS_HEIGHT,
+          CANVAS_HEIGHT + 50,
           CANVAS_WIDTH / 2,
           CANVAS_HEIGHT - 100,
         );
@@ -118,30 +119,22 @@
         ctx.globalAlpha = 1.0;
         //
         util.drawRect(0, 0, canvas.width, canvas.height, 'black');
+
+
+
+
+
+
+
+
+
+
+
         // 現在までの経過時間を取得
         let nowTime = (Date.now() - startTime) / 1000;
 
-        //viper登場シーン
-        if (viper.isComing === true) {
-            // 登場シーンが始まってからの経過時間を取得する
-            let justTime = Date.now();
-            let comingTime = (justTime - viper.comingStart) / 1000;
-            // 登場中は時間経過に合わせて上方にすすむ
-            let y = CANVAS_HEIGHT - comingTime * 50;
-            // ある程度の位置まで上にきたら、登場シーンを終了させ、位置も固定する
-            if (y <= viper.comingEndPosition.y) {
-                viper.isComing = false;
-                y = viper.comingEndPosition.y;
-            }
-            //
-            viper.position.set(viper.position.x, y);
-            // 現在時刻の秒数が4で割り切れるときに、viperを半透明にする、目的は、viperを点滅させること
-            if (justTime % 4 === 0) {
-                ctx.globalAlpha = 0.5;
-            }
-        }
-        viper.draw();
-
+        // viperを更新して描画
+        viper.update();
         // ずっとループさせつづけるために、描画処理を再帰呼び出し
         requestAnimationFrame(render);
     }

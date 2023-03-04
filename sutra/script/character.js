@@ -47,30 +47,49 @@ class Character {
      *
      * imageはオブジェクトの画像
      */
-    constructor(ctx, x, y, life, image) {
-        /**
-         *
-         */
-        this.ctx = ctx;
-        /**
-         * 画面上のオブジェクトの存在する座標
-         */
-        this.position = new Position(x, y);
-        /**
-         *
-         */
-        this.life = life;
-        /**
-         *
-         */
-        this.image = image;
+    constructor(ctx, x, y, w, h, life, image) {
+      /**
+       *
+       */
+      this.ctx = ctx;
+      /**
+       * 画面上のオブジェクトの存在する座標
+       */
+      this.position = new Position(x, y);
+      /**
+       *
+       */
+      this.width = w;
+      /**
+       *
+       *
+       */
+      this.height = h;
+      /**
+       *
+       *
+       */
+      this.life = life;
+      /**
+       *
+       */
+      this.image = image;
     }
 
     /**
      * オブジェクトを画面に描画する
      */
     draw() {
-        this.ctx.drawImage(this.image, this.position.x, this.position.y);
+        // offset
+        let offsetX = this.width / 2;
+        let offsetY = this.height / 2;
+        this.ctx.drawImage(
+            this.image,
+            this.position.x - offsetX,
+            this.position.y - offsetY,
+            this.width,
+            this.height
+        );
     }
 }
 
@@ -84,12 +103,14 @@ class Viper extends Character {
      *
      *
      *
+     *
+     *
      */
-    constructor(ctx, x, y, image) {
+    constructor(ctx, x, y, w, h, image) {
         //
         //
         // インスタンス化したときには、ライフは画面に描画されないためのフラグとして,0を与える
-        super(ctx, x, y, 0, image);
+        super(ctx, x, y, w, h, 0, image);
 
         /**
          *
@@ -101,6 +122,11 @@ class Viper extends Character {
          * 登場開始シーンが始まったときのタイムスタンプ
          */
         this.comingStart = null;
+        /**
+         * 登場シーンを開始する座標
+         *
+         */
+        this.comingStartPosition = null;
         /**
          *
          * 登場シーンが終わるときにviperの座標
@@ -123,6 +149,40 @@ class Viper extends Character {
         //
         this.position.set(startX, startY);
         //
+        this.comingStartPosition = new Position(startX, startY);
+        //
         this.comingEndPosition = new Position(endX, endY);
+    }
+    /**
+     * 画面オブジェクトを更新したのちに描画する
+     */
+    update() {
+        // 今の時点でのタイムスタンプを取得
+        let justTime = Date.now();
+
+        // 登場シーンのときの処理
+        if (this.isComing === true) {
+            // 登場シーンがスタートしてからの経過時間
+            let comingTime = (justTime - this.comingStart) / 1000;
+            //
+            let y = this.comingStartPosition.y - comingTime * 50;
+            //
+            if (y <= this.comingEndPosition.y) {
+                this.isComing = false;
+                // 行き過ぎる可能性があるので補正する
+                y = this.comingEndPosition.y;
+            }
+            // viperの上昇を実現するために、計算したy座標を設定する
+            this.position.set(this.position.x, y);
+
+            if (justTime % 4 === 0) {
+                this.ctx.globalAlpha = 0.5;//半透明にして、点滅を表現する
+            }
+        }
+        // 計算した、y座標、点滅の適用のもとで、viperを画面に描画する
+        this.draw();
+
+        // 念のためににグローバルアルファを戻しておく
+        this.ctx.globalAlpha = 1.0;
     }
 }

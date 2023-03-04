@@ -47,6 +47,16 @@
      */
     let viperY = CANVAS_HEIGHT / 2;
     /**
+     * viperが登場中かどうかのフラグ
+     * boolean
+     */
+    let isComing = false;
+    /**
+     * 登場中が始まったときのタイムスタンプ
+     *
+     */
+    let comingStart = null;
+    /**
      * リソースがすべて読み込まれたら実行されるアクション
      */
     window.addEventListener('load',
@@ -83,10 +93,19 @@
         //
         canvas.window = CANVAS_WIDTH;
         canvas.height = CANVAS_HEIGHT;
+
+        // viperが登場するところからスタートするために設定する
+        isComing = true;
+        comingStart = Date.now();
+        viperY = CANVAS_HEIGHT; //画面の下の端を初期位置にする
     }
     function eventSetting() {
         // キーが押されたときに、実行したいアクションを登録
         window.addEventListener('keydown', e => {
+            // 登場シーン中はキーの入力を無視する
+            if (isComing === true) {
+                return;
+            }
             switch (e.key) {
                 case 'ArrowLeft':
                     viperX -= 10;
@@ -107,11 +126,30 @@
      *
      */
     function render() {
+        // キャンバス描画を完全な不透明にする
+        ctx.globalAlpha = 1.0;
         //
         util.drawRect(0, 0, canvas.width, canvas.height, 'black');
         // 現在までの経過時間を取得
         let nowTime = (Date.now() - startTime) / 1000;
 
+        //viper登場シーン
+        if (isComing === true) {
+            // 登場シーンが始まってからの経過時間を取得する
+            let justTime = Date.now();
+            let comingTime = (justTime - comingStart) / 1000;
+            // 登場中は時間経過に合わせて上方にすすむ
+            viperY = CANVAS_HEIGHT - comingTime * 50;
+            // ある程度の位置まで上にきたら、登場シーンを終了させ、位置も固定する
+            if (viperY <= CANVAS_HEIGHT - 100) {
+                isComing = false;
+                viperY = CANVAS_HEIGHT - 100;
+            }
+            // 現在時刻の秒数が4で割り切れるときに、viperを半透明にする、目的は、viperを点滅させること
+            if (justTime % 4 === 0) {
+                ctx.globalAlpha = 0.5;
+            }
+        }
         ctx.drawImage(image,viperX, viperY);
 
         // ずっとループさせつづけるために、描画処理を再帰呼び出し

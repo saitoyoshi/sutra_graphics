@@ -31,31 +31,17 @@
 
     let image = null;
     /**
-     *
-     *
      */
     // 実行開始時のタイスタンプ
     let startTime = null;
-    /**
-     * viper x position
-     *
-     */
-    let viperX = CANVAS_WIDTH / 2;
-    /**
-     * viper y position
-     *
-     */
-    let viperY = CANVAS_HEIGHT / 2;
-    /**
-     * viperが登場中かどうかのフラグ
-     * boolean
-     */
-    let isComing = false;
-    /**
-     * 登場中が始まったときのタイムスタンプ
-     *
-     */
     let comingStart = null;
+    /**
+     *
+     *
+     *
+     *
+     */
+    let viper = null;
     /**
      * リソースがすべて読み込まれたら実行されるアクション
      */
@@ -90,34 +76,36 @@
      * canvasや２Dレンダリングコンテキストを初期化する
      */
     function initialize() {
-        //
         canvas.window = CANVAS_WIDTH;
         canvas.height = CANVAS_HEIGHT;
 
-        // viperが登場するところからスタートするために設定する
-        isComing = true;
-        comingStart = Date.now();
-        viperY = CANVAS_HEIGHT; //画面の下の端を初期位置にする
+        viper = new Viper(ctx, 0 ,0, image);
+        viper.setComing(
+          CANVAS_WIDTH / 2,
+          CANVAS_HEIGHT,
+          CANVAS_WIDTH / 2,
+          CANVAS_HEIGHT - 100,
+        );
     }
     function eventSetting() {
         // キーが押されたときに、実行したいアクションを登録
         window.addEventListener('keydown', e => {
             // 登場シーン中はキーの入力を無視する
-            if (isComing === true) {
+            if (viper.isComing === true) {
                 return;
             }
             switch (e.key) {
                 case 'ArrowLeft':
-                    viperX -= 10;
+                    viper.position.x -= 10;
                     break;
                 case 'ArrowRight':
-                    viperX += 10;
+                    viper.position.x += 10;
                     break;
                 case 'ArrowUp':
-                    viperY -= 10;
+                    viper.position.y -= 10;
                     break;
                 case 'ArrowDown':
-                    viperY += 10;
+                    viper.position.y += 10;
                     break;
             }
         },false);
@@ -134,23 +122,25 @@
         let nowTime = (Date.now() - startTime) / 1000;
 
         //viper登場シーン
-        if (isComing === true) {
+        if (viper.isComing === true) {
             // 登場シーンが始まってからの経過時間を取得する
             let justTime = Date.now();
-            let comingTime = (justTime - comingStart) / 1000;
+            let comingTime = (justTime - viper.comingStart) / 1000;
             // 登場中は時間経過に合わせて上方にすすむ
-            viperY = CANVAS_HEIGHT - comingTime * 50;
+            let y = CANVAS_HEIGHT - comingTime * 50;
             // ある程度の位置まで上にきたら、登場シーンを終了させ、位置も固定する
-            if (viperY <= CANVAS_HEIGHT - 100) {
-                isComing = false;
-                viperY = CANVAS_HEIGHT - 100;
+            if (y <= viper.comingEndPosition.y) {
+                viper.isComing = false;
+                y = viper.comingEndPosition.y;
             }
+            //
+            viper.position.set(viper.position.x, y);
             // 現在時刻の秒数が4で割り切れるときに、viperを半透明にする、目的は、viperを点滅させること
             if (justTime % 4 === 0) {
                 ctx.globalAlpha = 0.5;
             }
         }
-        ctx.drawImage(image,viperX, viperY);
+        viper.draw();
 
         // ずっとループさせつづけるために、描画処理を再帰呼び出し
         requestAnimationFrame(render);

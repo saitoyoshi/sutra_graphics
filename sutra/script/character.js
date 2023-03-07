@@ -45,9 +45,9 @@ class Character {
    *
    *
    *
-   * imageはオブジェクトの画像
+   * @param {string}}imagePath 画面オブジェクト（キャラクター）の画像のパス
    */
-  constructor(ctx, x, y, w, h, life, image) {
+  constructor(ctx, x, y, w, h, life, imagePath) {
     /**
      *
      */
@@ -73,7 +73,20 @@ class Character {
     /**
      *
      */
-    this.image = image;
+    this.ready = false;
+    /**
+     *
+     */
+    this.image = new Image();
+    this.image.addEventListener(
+      'load',
+      () => {
+        // 画像が適切に読み込まれたら、画像の準備が完了したという状態をもたせる
+        this.ready = true;
+      },
+      false,
+    );
+    this.image.src = imagePath;
   }
 
   /**
@@ -106,10 +119,10 @@ class Viper extends Character {
    *
    *
    */
-  constructor(ctx, x, y, w, h, image) {
+  constructor(ctx, x, y, w, h, imagePath) {
     //
     // インスタンス化したときには、ライフは画面に描画されないためのフラグとして,0を与える
-    super(ctx, x, y, w, h, 0, image);
+    super(ctx, x, y, w, h, 0, imagePath);
 
     /**
      * viperが更新されるたびに移動する量(スピードという概念と論理的には等価)
@@ -136,6 +149,11 @@ class Viper extends Character {
      * 登場シーンが終わるときにviperの座標
      */
     this.comingEndPosition = null;
+    /**
+     *
+     *
+     */
+    this.shotArray = null;
   }
 
   /**
@@ -158,6 +176,12 @@ class Viper extends Character {
     this.comingEndPosition = new Position(endX, endY);
   }
 
+  /**
+   * viperがショットを打てるように設定する
+   */
+  setShotArray(shotArray) {
+    this.shotArray = shotArray;
+  }
   /**
    * 画面オブジェクトを更新したのちに描画する
    */
@@ -205,11 +229,72 @@ class Viper extends Character {
       let ty = Math.min(Math.max(this.position.y, 0), canvasHeight);
       // 目的を実現するための計算処理で求めた座標をセットする
       this.position.set(tx, ty);
+
+      // キーが押されていれば、ショットを発射する(生成する)
+      if (window.isKeyDown.key_z === true) {
+        // 死んでる（画面に描画されていない）ショットがあれば、ショットを生成する
+        for (let i = 0; i < this.shotArray.length; i++) {
+          // 死んでるか確認する
+          if (this.shotArray[i].life <= 0) {
+            // viperのいる座標（場所）にショットを生成する
+            this.shotArray[i].set(this.position.x, this.position.y);
+
+            // ひとつ作ったらループを抜ける
+            break;
+          }
+        }
+      }
     }
     // 計算した、y座標、点滅の適用のもとで、viperを画面に描画する
     this.draw();
 
     // 念のためににグローバルアルファを戻しておく
     this.ctx.globalAlpha = 1.0;
+  }
+}
+
+/**
+ *
+ */
+class Shot extends Character {
+  /**
+   *
+   *
+   *
+   *
+   */
+  constructor(ctx, x, y, w, h, imagePath) {
+    super(ctx, x, y, w, h, 0, imagePath);
+
+    /**
+     * ショットの更新のたびに進む移動量（移動スピード）
+     */
+    this.speed = 7;
+  }
+
+  /**
+   * ショットをキャンバス上に配置する
+   */
+  set(x, y) {
+    this.position.set(x, y);
+    // ショットが生きている状態（画面にいる）に設定
+    this.life = 1;
+  }
+  /**
+   * ショットの状態を更新して描画する
+   */
+  update() {
+    // もし、ショットが死んでいる状態なら何もしない
+    if (this.life <= 0) {
+      return;
+    }
+    // ショットが画面外の座標になっていたら、死んでいる状態にする
+    if (this.position.y + this.height < 0) {
+      this.life = 0;
+    }
+    // ショットを上に向かって移動させる
+    this.position.y -= this.speed;
+    // 移動させた後に描画する
+    this.draw();
   }
 }

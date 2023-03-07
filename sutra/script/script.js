@@ -18,7 +18,10 @@
    * @type {number}
    */
   const CANVAS_HEIGHT = 620;
-
+  /**
+   *
+   */
+  const SHOT_MAX_COUNT = 10;
   /**
    * Canvas2D APIをラップしたユーティリティクラス
    * @type {Canvas2DUtility}
@@ -29,12 +32,6 @@
    * @type {CanvasRenderingContext2D}}
    */
   let ctx = null;
-  /**
-   * 画像のインスタンス
-   *
-   */
-
-  let image = null;
   /**
    */
   // 実行開始時のタイスタンプ
@@ -48,6 +45,11 @@
    */
   let viper = null;
   /**
+   *
+   *
+   */
+  let shotArray = [];
+  /**
    * リソースがすべて読み込まれたら実行されるアクション
    */
   window.addEventListener(
@@ -60,20 +62,11 @@
       // 2Dレンダリングコンテキストを取得
       ctx = util.context;
 
-      // まず最初に画像の読み込みを開始
-      util.imageLoader("./image/viper.png", (loadedImage) => {
-        // 引数経由で画像を受け取り変数に入れておく
-
-        image = loadedImage;
-        //
-        initialize();
-        //
-        eventSetting();
-        //
-        startTime = Date.now(); //now()はDateオブジェクトの静的メソッド
-        //
-        render();
-      });
+      //
+      initialize();
+      //
+      // インスタンスが読み込まれているか状態を確認する
+      loadCheck();
     },
     false
   );
@@ -85,7 +78,7 @@
     canvas.window = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
 
-    viper = new Viper(ctx, 0, 0, 64, 64, image);
+    viper = new Viper(ctx, 0, 0, 64, 64, './image/viper.png');
     // 登場シーンから開始させる
     viper.setComing(
       CANVAS_WIDTH / 2,
@@ -93,8 +86,39 @@
       CANVAS_WIDTH / 2,
       CANVAS_HEIGHT - 100
     );
+    // ショットを初期化する
+    for (let i = 0; i < SHOT_MAX_COUNT; i++) {
+      shotArray[i] = new Shot(ctx, 0, 0, 32, 32, './image/viper_shot.png');
+    }
+    viper.setShotArray(shotArray);
   }
 
+  /**
+   * インスタンスの準備が完了しているか確認する
+   */
+  function loadCheck() {
+    // 準備が完了していればtrue
+    let ready = true;
+    // AND演算処理で、全体の準備完了の真偽値をもとめる
+    ready = ready && viper.ready;
+    //
+    shotArray.map(v => {
+      ready = ready && v.ready;
+    });
+
+    // すべての準備が完了しているか、どうかで条件分岐
+    if (ready === true) {
+      //
+      eventSetting();
+      // 準備完了時のタイムスタンプを取得
+      startTime = Date.now();
+      //
+      render();
+    } else {
+      //
+      setTimeout(loadCheck, 100);
+    }
+  }
   function eventSetting() {
     // キーが押されたときに、実行したいアクションを登録
     window.addEventListener(
@@ -129,6 +153,11 @@
 
     // viperを更新して描画
     viper.update();
+
+    // ショットの状態を更新した後に描画
+    shotArray.map(v => {
+      v.update();
+    });
     // ずっとループさせつづけるために、描画処理を再帰呼び出し
     requestAnimationFrame(render);
   }

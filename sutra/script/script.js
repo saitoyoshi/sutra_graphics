@@ -44,11 +44,14 @@
    *
    */
   let viper = null;
+
+  let shotArray = [];
   /**
    *
    *
+   *
    */
-  let shotArray = [];
+  let singleShotArray = [];
   /**
    * リソースがすべて読み込まれたら実行されるアクション
    */
@@ -86,11 +89,23 @@
       CANVAS_WIDTH / 2,
       CANVAS_HEIGHT - 100
     );
+
+
+
+
+
+
+
+
+
+
     // ショットを初期化する
     for (let i = 0; i < SHOT_MAX_COUNT; i++) {
       shotArray[i] = new Shot(ctx, 0, 0, 32, 32, './image/viper_shot.png');
+      singleShotArray[i * 2] = new Shot(ctx, 0, 0, 32, 32, './image/viper_single_shot.png');
+      singleShotArray[i * 2 + 1] = new Shot(ctx, 0, 0, 32, 32, './image/viper_single_shot.png');
     }
-    viper.setShotArray(shotArray);
+    viper.setShotArray(shotArray, singleShotArray);
   }
 
   /**
@@ -105,7 +120,10 @@
     shotArray.map(v => {
       ready = ready && v.ready;
     });
-
+    //
+    singleShotArray.map(v => {
+      ready = ready && v.ready;
+    });
     // すべての準備が完了しているか、どうかで条件分岐
     if (ready === true) {
       //
@@ -156,6 +174,10 @@
 
     // ショットの状態を更新した後に描画
     shotArray.map(v => {
+      v.update();
+    });
+    //
+    singleShotArray.map(v => {
       v.update();
     });
     // ずっとループさせつづけるために、描画処理を再帰呼び出し

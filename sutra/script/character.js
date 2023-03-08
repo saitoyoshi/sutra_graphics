@@ -164,6 +164,11 @@ class Viper extends Character {
      *
      */
     this.shotArray = null;
+    /**
+     *
+     *
+     */
+    this.singleShotArray = null;
   }
 
   /**
@@ -189,8 +194,9 @@ class Viper extends Character {
   /**
    * viperがショットを打てるように設定する
    */
-  setShotArray(shotArray) {
+  setShotArray(shotArray, singleShotArray) {
     this.shotArray = shotArray;
+    this.singleShotArray = singleShotArray;
   }
   /**
    * 画面オブジェクトを更新したのちに描画する
@@ -246,7 +252,8 @@ class Viper extends Character {
         // ショットチェック用のカウンターが0以上であれば、ショットを生成する
         if (this.shotCheckCounter >= 0) {
           // 死んでる（画面に描画されていない）ショットがあれば、ショットを生成する
-          for (let i = 0; i < this.shotArray.length; i++) {
+          let i;
+          for (i = 0; i < this.shotArray.length; i++) {
             // 死んでるか確認する
             if (this.shotArray[i].life <= 0) {
               // viperのいる座標（場所）にショットを生成する
@@ -254,6 +261,21 @@ class Viper extends Character {
               // ショットを生成したので、次のショットを打てるまでの間隔を設定する
               this.shotCheckCounter =  -this.shotInterval;
               // ひとつ作ったらループを抜ける
+              break;
+            }
+          }
+          // シングルショットが死んでいるものがあれば、生成する
+          // このとき、2個ワンセットで生成して、左右に進行方向を分岐させる
+          for (i = 0; i < this.singleShotArray.length; i++) {
+            if (this.singleShotArray[i].life <= 0 && this.singleShotArray[i + 1].life <= 0) {
+              // viperのいる座標にショットを生成
+              this.singleShotArray[i].set(this.position.x, this.position.y);
+              this.singleShotArray[i].setVector(0.2, -0.9);
+              this.singleShotArray[i + 1].set(this.position.x, this.position.y);
+              this.singleShotArray[i + 1].setVector(-0.2, -0.9);
+              // ショットをつくったので、次のショットが作れるまでの間隔をつくる
+              this.shotCheckCounter = -this.shotInterval;
+              // 一組生成したら、ループを抜ける
               break;
             }
           }
@@ -286,6 +308,11 @@ class Shot extends Character {
      * ショットの更新のたびに進む移動量（移動スピード）
      */
     this.speed = 7;
+    /**
+     *
+     *
+     */
+    this.vector = new Position(0.0, -1.0);
   }
 
   /**
@@ -296,6 +323,13 @@ class Shot extends Character {
     // ショットが生きている状態（画面にいる）に設定
     this.life = 1;
   }
+    /**
+   *
+   *
+   */
+    setVector(x, y) {
+    this.vector.set(x, y);
+    }
   /**
    * ショットの状態を更新して描画する
    */
@@ -308,9 +342,12 @@ class Shot extends Character {
     if (this.position.y + this.height < 0) {
       this.life = 0;
     }
-    // ショットを上に向かって移動させる
-    this.position.y -= this.speed;
+    // ショットをベクトルに沿って移動させる
+    this.position.x += this.vector.x * this.speed;
+    this.position.y += this.vector.y * this.speed;
     // 移動させた後に描画する
     this.draw();
   }
+
+
 }

@@ -344,6 +344,75 @@ class Viper extends Character {
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ *
+ */
+class Enemy extends Character {
+  /**
+   *
+   *
+   *
+   *
+   *
+   */
+  constructor(ctx, x, y, w, h, imagePath) {
+    super(ctx, x, y, w, h, 0, imagePath);
+
+    /**
+     *
+     *
+     */
+    this.speed = 3;
+  }
+
+  /**
+   *
+   *
+   */
+  set(x, y, life = 1) {
+    this.position.set(x, y);
+    // 敵キャラクターを生きている状態で配置
+    this.life = life;
+  }
+
+  /**
+   *
+   */
+  update() {
+    // 死んでればなにもしない
+    if (this.life <= 0) {
+      return;
+    }
+    // 画面外にでていたら死んでいる状態にする
+    if (this.position.y - this.height > this.ctx.canvas.height) {
+      this.life = 0;
+    }
+    // 敵キャラを進行方向に向かって移動させる
+    this.position.x += this.vector.x * this.speed;
+    this.position.y += this.vector.y * this.speed;
+
+    //
+    this.draw();
+  }
+}
 /**
  *
  */

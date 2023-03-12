@@ -19,6 +19,10 @@
    */
   const CANVAS_HEIGHT = 620;
   /**
+   * 敵キャラクターのインスタンス数
+   */
+  const ENEMY_MAX_COUNT = 10;
+  /**
    *
    */
   const SHOT_MAX_COUNT = 10;
@@ -33,6 +37,13 @@
    */
   let ctx = null;
   /**
+   *
+   *
+   *
+   *
+   */
+  let scene = null;
+  /**
    */
   // 実行開始時のタイスタンプ
   let startTime = null;
@@ -42,9 +53,14 @@
    *
    *
    *
+   *
    */
   let viper = null;
-
+  /**
+   *
+   *
+   */
+  let enemyArray = [];
   let shotArray = [];
   /**
    *
@@ -78,8 +94,12 @@
    * canvasや２Dレンダリングコンテキストを初期化する
    */
   function initialize() {
+    let i;
     canvas.window = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
+
+    //
+    scene = new SceneManager();
 
     viper = new Viper(ctx, 0, 0, 64, 64, './image/viper.png');
     // 登場シーンから開始させる
@@ -89,6 +109,11 @@
       CANVAS_WIDTH / 2,
       CANVAS_HEIGHT - 100
     );
+
+    // 敵キャラクターを初期化
+    for (i = 0; i < ENEMY_MAX_COUNT; i++) {
+      enemyArray[i] = new Enemy(ctx, 0, 0, 48, 48, './image/enemy_small.png');
+    }
 
 
 
@@ -100,7 +125,7 @@
 
 
     // ショットを初期化する
-    for (let i = 0; i < SHOT_MAX_COUNT; i++) {
+    for (i = 0; i < SHOT_MAX_COUNT; i++) {
       shotArray[i] = new Shot(ctx, 0, 0, 32, 32, './image/viper_shot.png');
       singleShotArray[i * 2] = new Shot(ctx, 0, 0, 32, 32, './image/viper_single_shot.png');
       singleShotArray[i * 2 + 1] = new Shot(ctx, 0, 0, 32, 32, './image/viper_single_shot.png');
@@ -117,6 +142,10 @@
     // AND演算処理で、全体の準備完了の真偽値をもとめる
     ready = ready && viper.ready;
     //
+    enemyArray.map(v => {
+      ready = ready && v.ready;
+    });
+    //
     shotArray.map(v => {
       ready = ready && v.ready;
     });
@@ -128,6 +157,8 @@
     if (ready === true) {
       //
       eventSetting();
+      //
+      sceneSetting();
       // 準備完了時のタイムスタンプを取得
       startTime = Date.now();
       //
@@ -169,8 +200,13 @@
     // 現在までの経過時間を取得
     let nowTime = (Date.now() - startTime) / 1000;
 
+    scene.update();
     // viperを更新して描画
     viper.update();
+
+    enemyArray.map(v => {
+      v.update();
+    })
 
     // ショットの状態を更新した後に描画
     shotArray.map(v => {
@@ -183,7 +219,27 @@
     // ずっとループさせつづけるために、描画処理を再帰呼び出し
     requestAnimationFrame(render);
   }
-
+  function sceneSetting() {
+    scene.add('intro', time => {
+      if (time > 2.0) {
+        scene.use('invade');
+      }
+    });
+    scene.add('invade', time => {
+      if (scene.frame !== 0) {
+        return;
+      }
+      for (let i = 0; i < ENEMY_MAX_COUNT; i++) {
+        if (enemyArray[i].life <= 0) {
+          let e = enemyArray[i];
+          e.set(CANVAS_WIDTH / 2, -e.height);
+          e.setVector(0.0, 1.0);
+          break;
+        }
+      }
+    });
+    scene.use('intro');
+  }
   /**
    *
    *

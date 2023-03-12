@@ -58,6 +58,18 @@ class Character {
     this.position = new Position(x, y);
     /**
      *
+     *
+     *
+     */
+    this.vector = new Position(0.0, -1.0);
+    /**
+     *
+     *
+     *
+     */
+    this.angle = (270 * Math.PI) / 180; //270度
+    /**
+     *
      */
     this.width = w;
     /**
@@ -88,6 +100,24 @@ class Character {
     );
     this.image.src = imagePath;
   }
+  /**
+   *
+   *
+   */
+  setVector(x, y) {
+    this.vector.set(x, y);
+  }
+
+  /**
+   *
+   *
+   */
+  setVectorFromAngle(angle) {
+    this.angle = angle;
+    let sin = Math.sin(angle);
+    let cos = Math.cos(angle);
+    this.vector.set(cos, sin);
+  }
 
   /**
    * オブジェクトを画面に描画する
@@ -103,6 +133,26 @@ class Character {
       this.width,
       this.height
     );
+  }
+  rotationDraw() {
+    this.ctx.save();
+    this.ctx.translate(this.position.x, this.position.y);
+    // 270度の位置を基準とするため
+    this.ctx.rotate(this.angle - Math.PI * 1.5);
+
+    //
+    let offsetX = this.width / 2;
+    let offsetY = this.height / 2;
+    this.ctx.drawImage(
+      this.image,
+      -offsetX,
+      -offsetY,
+      this.width,
+      this.height,
+    );
+
+    // 回転する前の状態に復元する
+    this.ctx.restore();
   }
 }
 
@@ -268,11 +318,14 @@ class Viper extends Character {
           // このとき、2個ワンセットで生成して、左右に進行方向を分岐させる
           for (i = 0; i < this.singleShotArray.length; i++) {
             if (this.singleShotArray[i].life <= 0 && this.singleShotArray[i + 1].life <= 0) {
+              //
+              let radCW = (280 * Math.PI) / 180;
+              let radCWW = (260 * Math.PI) / 180;
               // viperのいる座標にショットを生成
               this.singleShotArray[i].set(this.position.x, this.position.y);
-              this.singleShotArray[i].setVector(0.2, -0.9);
+              this.singleShotArray[i].setVectorFromAngle(radCW);
               this.singleShotArray[i + 1].set(this.position.x, this.position.y);
-              this.singleShotArray[i + 1].setVector(-0.2, -0.9);
+              this.singleShotArray[i + 1].setVectorFromAngle(radCWW);
               // ショットをつくったので、次のショットが作れるまでの間隔をつくる
               this.shotCheckCounter = -this.shotInterval;
               // 一組生成したら、ループを抜ける
@@ -308,11 +361,6 @@ class Shot extends Character {
      * ショットの更新のたびに進む移動量（移動スピード）
      */
     this.speed = 7;
-    /**
-     *
-     *
-     */
-    this.vector = new Position(0.0, -1.0);
   }
 
   /**
@@ -323,13 +371,6 @@ class Shot extends Character {
     // ショットが生きている状態（画面にいる）に設定
     this.life = 1;
   }
-    /**
-   *
-   *
-   */
-    setVector(x, y) {
-    this.vector.set(x, y);
-    }
   /**
    * ショットの状態を更新して描画する
    */
@@ -345,8 +386,8 @@ class Shot extends Character {
     // ショットをベクトルに沿って移動させる
     this.position.x += this.vector.x * this.speed;
     this.position.y += this.vector.y * this.speed;
-    // 移動させた後に描画する
-    this.draw();
+    // 座標系の回転を考慮して、画面に描写する
+    this.rotationDraw();
   }
 
 

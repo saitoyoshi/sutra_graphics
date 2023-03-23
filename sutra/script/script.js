@@ -150,7 +150,12 @@
       enemyArray[i].setShotArray(enemyShotArray);
     }
 
-
+    //
+    for (i = 0; i < SHOT_MAX_COUNT; i++) {
+      shotArray[i].setTargets(enemyArray);
+      singleShotArray[i * 2].setTargets(enemyArray);
+      singleShotArray[i * 2 + 1].setTargets(enemyArray);
+    }
 
 
 
@@ -226,6 +231,34 @@
   /**
    *
    */
+
+  function sceneSetting() {
+    scene.add('intro', time => {
+      if (time > 2.0) {
+        scene.use('invade');
+      }
+    });
+    scene.add('invade', time => {
+      //
+      if (scene.frame === 0) {
+        //
+        for (let i = 0; i < ENEMY_MAX_COUNT; i++) {
+          if (enemyArray[i].life <= 0) {
+            let e = enemyArray[i];
+            e.set(CANVAS_WIDTH / 2, -e.height, 2, 'default');
+            e.setVector(0.0, 1.0);
+            break;
+          }
+        }
+
+      }
+      if (scene.frame === 100) {
+        scene.use('invade');
+      }
+    });
+    scene.use('intro');
+  }
+
   function render() {
     // キャンバス描画を完全な不透明にする
     ctx.globalAlpha = 1.0;
@@ -257,32 +290,6 @@
     });
     // ずっとループさせつづけるために、描画処理を再帰呼び出し
     requestAnimationFrame(render);
-  }
-  function sceneSetting() {
-    scene.add('intro', time => {
-      if (time > 2.0) {
-        scene.use('invade');
-      }
-    });
-    scene.add('invade', time => {
-      //
-      if (scene.frame === 0) {
-        //
-        for (let i = 0; i < ENEMY_MAX_COUNT; i++) {
-          if (enemyArray[i].life <= 0) {
-            let e = enemyArray[i];
-            e.set(CANVAS_WIDTH / 2, -e.height, 1, 'default');
-            e.setVector(0.0, 1.0);
-            break;
-          }
-        }
-
-      }
-      if (scene.frame === 100) {
-        scene.use('invade');
-      }
-    });
-    scene.use('intro');
   }
   /**
    *

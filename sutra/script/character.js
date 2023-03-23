@@ -33,6 +33,16 @@ class Position {
       this.y = y;
     }
   }
+
+  /**
+   *
+   *
+   */
+  distance(target) {
+    let x = this.x - target.x;
+    let y = this.y - target.y;
+    return Math.sqrt(x * x + y * y);
+  }
 }
 
 /**
@@ -308,6 +318,7 @@ class Viper extends Character {
             if (this.shotArray[i].life <= 0) {
               // viperのいる座標（場所）にショットを生成する
               this.shotArray[i].set(this.position.x, this.position.y);
+              this.shotArray[i].setPower(2);
               // ショットを生成したので、次のショットを打てるまでの間隔を設定する
               this.shotCheckCounter =  -this.shotInterval;
               // ひとつ作ったらループを抜ける
@@ -479,16 +490,28 @@ class Shot extends Character {
      * ショットの更新のたびに進む移動量（移動スピード）
      */
     this.speed = 7;
+    /**
+     *
+     *
+     */
+    this.power = 1;
+    /**
+     *
+     *
+     */
+    this.targetArray = [];
   }
 
   /**
    * ショットをキャンバス上に配置する
    */
-  set(x, y, speed) {
+  set(x, y, speed, power) {
     this.position.set(x, y);
     // ショットが生きている状態（画面にいる）に設定
     this.life = 1;
     this.setSpeed(speed);
+    //
+    this.setPower(power);
   }
   /**
    *
@@ -498,6 +521,30 @@ class Shot extends Character {
     //
     if (speed != null && speed > 0) {
       this.speed = speed;
+    }
+  }
+  /**
+   *
+   *
+   */
+  setPower(power) {
+    //
+    if (power != null && power > 0) {
+      this.power = power;
+    }
+  }
+
+  /**
+   *
+   *
+   */
+  setTargets(targets) {
+    if (
+      targets != null &&
+      Array.isArray(targets) === true &&
+      targets.length > 0
+    ) {
+      this.targetArray = targets;
     }
   }
   /**
@@ -516,6 +563,63 @@ class Shot extends Character {
     // ショットをベクトルに沿って移動させる
     this.position.x += this.vector.x * this.speed;
     this.position.y += this.vector.y * this.speed;
+
+    //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //
+    this.targetArray.map(v => {
+      //
+      if (this.life <= 0 || v.life <= 0) {
+        return;
+      }
+      //
+      let dist = this.position.distance(v.position);
+      //
+      if (dist <= (this.width + v. width) / 4) {
+        //
+        v.life -= this.power;
+        //
+        this.life = 0;
+      }
+    });
     // 座標系の回転を考慮して、画面に描写する
     this.rotationDraw();
   }

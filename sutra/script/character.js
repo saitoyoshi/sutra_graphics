@@ -376,23 +376,45 @@ class Enemy extends Character {
   constructor(ctx, x, y, w, h, imagePath) {
     super(ctx, x, y, w, h, 0, imagePath);
 
+    this.type = 'default';
+    /**
+     * Enemyが出現してからフレーム数
+     *
+     */
+    this.frame = 0;
     /**
      *
      *
      */
     this.speed = 3;
+    /**
+     * Enemyが持っているショットのインスタンスの配列
+     *
+     */
+    this.shotArray = null;
   }
 
   /**
    *
    *
    */
-  set(x, y, life = 1) {
+  set(x, y, life = 1, type = 'default') {
     this.position.set(x, y);
     // 敵キャラクターを生きている状態で配置
     this.life = life;
+    //
+    this.type = type;
+    // Enemyのフレームを0にリセットする
+    this.frame = 0;
   }
 
+  /**
+   * Enemyが持つショットのインスタンスの配列の設定をする
+   *
+   */
+  setShotArray(shotArray) {
+    this.shotArray = shotArray;
+  }
   /**
    *
    */
@@ -401,16 +423,43 @@ class Enemy extends Character {
     if (this.life <= 0) {
       return;
     }
-    // 画面外にでていたら死んでいる状態にする
-    if (this.position.y - this.height > this.ctx.canvas.height) {
-      this.life = 0;
+    //
+    switch(this.type) {
+      case 'default':
+      default:
+        if (this.frame === 50) {
+          this.fire();
+        }
+        // 敵キャラを進行方向に向かって移動させる
+        this.position.x += this.vector.x * this.speed;
+        this.position.y += this.vector.y * this.speed;
+      // 画面外にでていたら死んでいる状態にする
+        if (this.position.y - this.height > this.ctx.canvas.height) {
+          this.life = 0;
+        }
+        break;
     }
-    // 敵キャラを進行方向に向かって移動させる
-    this.position.x += this.vector.x * this.speed;
-    this.position.y += this.vector.y * this.speed;
 
     //
     this.draw();
+  }
+  /**
+   *
+   */
+  fire(x = 0.0, y = 1.0) {
+    for (let i = 0; i < this.shotArray.length; i++) {
+      // ショットが死んでいるかチェック
+      if (this.shotArray[i].life <= 0) {
+        this.shotArray[i].set(this.position.x, this.position.y);
+        //
+        this.shotArray[i].setSpeed(5.0);
+        //
+        this.shotArray[i].setVector(x, y);
+        //
+        break;
+      }
+    }
+
   }
 }
 /**
@@ -435,10 +484,21 @@ class Shot extends Character {
   /**
    * ショットをキャンバス上に配置する
    */
-  set(x, y) {
+  set(x, y, speed) {
     this.position.set(x, y);
     // ショットが生きている状態（画面にいる）に設定
     this.life = 1;
+    this.setSpeed(speed);
+  }
+  /**
+   *
+   *
+   */
+  setSpeed(speed) {
+    //
+    if (speed != null && speed > 0) {
+      this.speed = speed;
+    }
   }
   /**
    * ショットの状態を更新して描画する
@@ -449,7 +509,8 @@ class Shot extends Character {
       return;
     }
     // ショットが画面外の座標になっていたら、死んでいる状態にする
-    if (this.position.y + this.height < 0) {
+    if (this.position.y + this.height < 0 ||
+      this.position.y - this.height > this.ctx.canvas.height) {
       this.life = 0;
     }
     // ショットをベクトルに沿って移動させる

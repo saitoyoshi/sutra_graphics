@@ -500,6 +500,47 @@ class Shot extends Character {
      *
      */
     this.targetArray = [];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     *
+     * 爆発エフェクトのインスタンスを格納する
+     */
+    this.explosionArray = [];
   }
 
   /**
@@ -547,6 +588,21 @@ class Shot extends Character {
       this.targetArray = targets;
     }
   }
+
+  /**
+   *
+   *
+   */
+  setExplosions(targets) {
+    //
+    if (
+      targets != null &&
+      Array.isArray(targets) === true &&
+      targets.length > 0
+    ) {
+      this.explosionArray = targets;
+    }
+  }
   /**
    * ショットの状態を更新して描画する
    */
@@ -563,40 +619,6 @@ class Shot extends Character {
     // ショットをベクトルに沿って移動させる
     this.position.x += this.vector.x * this.speed;
     this.position.y += this.vector.y * this.speed;
-
-    //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -617,12 +639,155 @@ class Shot extends Character {
         //
         v.life -= this.power;
         //
+        //
+        if (v.life <= 0) {
+          for (let i = 0; i < this.explosionArray.length; i++) {
+            //
+            if (this.explosionArray[i].life !== true) {
+              this.explosionArray[i].set(v.position.x, v.position.y);
+              break;
+            }
+          }
+        }
         this.life = 0;
       }
     });
     // 座標系の回転を考慮して、画面に描写する
     this.rotationDraw();
   }
+}
 
+/**
+ *
+ */
+class Explosion {
+  /**
+   *
+   *
+   *
+   *
+   *
+   *
+   *
+   */
+  constructor(ctx, radius, count, size, timeRange, color = '#ff1166') {
+    /**
+     *
+     */
+    this.ctx = ctx;
+    /**
+     *
+     * 爆発インスタンスが死んでいればfalse
+     */
+    this.life = false;
+    /**
+     *
+     *
+     */
+    this.color = color;
+    /**
+     *
+     *
+     */
+    this.position = null;
+    /**
+     *
+     *
+     */
+    this.radius = radius;
+    /**
+     *
+     *
+     */
+    this.count = count;
+    /**
+     * 爆発が始まった瞬間のタイムスタンプ
+     *
+     */
+    this.startTime = 0;
+    /**
+     * 爆発が消えるまでの時間
+     *
+     */
+    this.timeRange = timeRange;
+    /**
+     *
+     *
+     */
+    this.fireSize = size;
+    /**
+     * 火花の位置を格納する配列
+     *
+     */
+    this.firePosition = [];
+    /**
+     *
+     *
+     */
+    this.fireVector = [];
+  }
 
+  /**
+   *
+   *
+   *
+   */
+  set(x, y) {
+    //
+    for (let i = 0; i < this.count; i++) {
+      //
+      this.firePosition[i] = new Position(x, y);
+
+      // ランダムに火花が進む方向を決めるラジアンを取得
+      let r = Math.random() * Math.PI * 2.0;
+      //
+      let s = Math.sin(r);
+      let c = Math.cos(r);
+      this.fireVector[i] = new Position(c, s);
+    }
+    // 爆発を生きている状態に設定
+    this.life = true;
+    //
+    this.startTime = Date.now();
+  }
+
+  /**
+   *
+   */
+  update() {
+    // 爆発が生きているか死んでいるか確認する
+    if (this.life !== true) {
+      return;
+    }
+    //
+    this.ctx.fillStyle = this.color;
+    this.ctx.globalAlpha = 0.5;
+    // 爆発が発生してからの経過時間を求める
+    let time = (Date.now() - this.startTime) / 1000;
+
+    //
+    let progress = Math.min(time / this.timeRange, 1.0);
+
+    //
+    for (let i = 0; i < this.firePosition.length; i++) {
+      //
+      let d = this.radius * progress;
+      //
+      let x = this.firePosition[i].x + this.fireVector[i].x * d;
+      let y = this.firePosition[i].y + this.fireVector[i].y * d;
+      //
+      this.ctx.fillRect(
+        x - this.fireSize / 2,
+        y - this.fireSize / 2,
+        this.fireSize,
+        this.fireSize,
+      );
+    }
+
+    //
+    // 進捗が100%までいってたら死んでいる状態にする
+    if (progress >= 1.0) {
+      this.life = false;
+    }
+  }
 }

@@ -32,6 +32,11 @@
    */
   const ENEMY_SHOT_MAX_COUNT = 50;
   /**
+   *
+   *
+   */
+  const EXPLOSION_MAX_COUNT = 10;
+  /**
    * Canvas2D APIをラップしたユーティリティクラス
    * @type {Canvas2DUtility}
    */
@@ -85,6 +90,11 @@
    *
    */
   let enemyShotArray = [];
+  /**
+   *
+   *
+   */
+  let explosionArray = [];
 
   /**
    * リソースがすべて読み込まれたら実行されるアクション
@@ -119,6 +129,11 @@
     //
     scene = new SceneManager();
 
+    //
+    for (i = 0; i < EXPLOSION_MAX_COUNT; i++) {
+      explosionArray[i] = new Explosion(ctx, 50.0, 15, 30.0, 0.25);
+    }
+
 
 
     //
@@ -150,11 +165,15 @@
       enemyArray[i].setShotArray(enemyShotArray);
     }
 
+    // 衝突判定を行う対象を設定する
     //
     for (i = 0; i < SHOT_MAX_COUNT; i++) {
       shotArray[i].setTargets(enemyArray);
       singleShotArray[i * 2].setTargets(enemyArray);
       singleShotArray[i * 2 + 1].setTargets(enemyArray);
+      shotArray[i].setExplosions(explosionArray);
+      singleShotArray[i * 2].setExplosions(explosionArray);
+      singleShotArray[i * 2 + 1].setExplosions(explosionArray);
     }
 
 
@@ -286,6 +305,11 @@
     });
 
     enemyShotArray.map(v => {
+      v.update();
+    });
+
+    //
+    explosionArray.map(v => {
       v.update();
     });
     // ずっとループさせつづけるために、描画処理を再帰呼び出し

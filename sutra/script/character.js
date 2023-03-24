@@ -714,7 +714,12 @@ class Explosion {
      *
      *
      */
-    this.fireSize = size;
+    this.fireBaseSize = size;
+    /**
+     *
+     *
+     */
+    this.fireSize = [];
     /**
      * 火花の位置を格納する配列
      *
@@ -739,11 +744,14 @@ class Explosion {
       this.firePosition[i] = new Position(x, y);
 
       // ランダムに火花が進む方向を決めるラジアンを取得
-      let r = Math.random() * Math.PI * 2.0;
+      let vr = Math.random() * Math.PI * 2.0;
       //
-      let s = Math.sin(r);
-      let c = Math.cos(r);
-      this.fireVector[i] = new Position(c, s);
+      let s = Math.sin(vr);
+      let c = Math.cos(vr);
+      //
+      let mr = Math.random();
+      this.fireVector[i] = new Position(c * mr, s * mr);
+      this.fireSize[i] = (Math.random() * 0.5 + 0.5) * this.fireBaseSize;
     }
     // 爆発を生きている状態に設定
     this.life = true;
@@ -776,11 +784,13 @@ class Explosion {
       let x = this.firePosition[i].x + this.fireVector[i].x * d;
       let y = this.firePosition[i].y + this.fireVector[i].y * d;
       //
+      let s = 1.0 - progress;
+      //
       this.ctx.fillRect(
-        x - this.fireSize / 2,
-        y - this.fireSize / 2,
-        this.fireSize,
-        this.fireSize,
+        x - (this.fireSize[i] * s) / 2,
+        y - (this.fireSize[i] * s) / 2,
+        this.fireSize[i] * s,
+        this.fireSize[i] * s,
       );
     }
 

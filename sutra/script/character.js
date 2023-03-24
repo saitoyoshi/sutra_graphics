@@ -182,7 +182,7 @@ class Viper extends Character {
   constructor(ctx, x, y, w, h, imagePath) {
     //
     // インスタンス化したときには、ライフは画面に描画されないためのフラグとして,0を与える
-    super(ctx, x, y, w, h, 0, imagePath);
+    super(ctx, x, y, w, h, 1, imagePath);
 
     /**
      * viperが更新されるたびに移動する量(スピードという概念と論理的には等価)
@@ -240,6 +240,8 @@ class Viper extends Character {
    */
   setComing(startX, startY, endX, endY) {
     //
+    this.life = 1;
+    //
     this.isComing = true;
     //
     this.comingStart = Date.now();
@@ -261,7 +263,24 @@ class Viper extends Character {
   /**
    * 画面オブジェクトを更新したのちに描画する
    */
+
+
+
+
+
+
+
+
+
+
+
+
+
   update() {
+    //
+    if (this.life <= 0) {
+      return;
+    }
     // 今の時点でのタイムスタンプを取得
     let justTime = Date.now();
 
@@ -588,13 +607,11 @@ class Shot extends Character {
       this.targetArray = targets;
     }
   }
-
   /**
    *
    *
    */
   setExplosions(targets) {
-    //
     if (
       targets != null &&
       Array.isArray(targets) === true &&
@@ -619,24 +636,19 @@ class Shot extends Character {
     // ショットをベクトルに沿って移動させる
     this.position.x += this.vector.x * this.speed;
     this.position.y += this.vector.y * this.speed;
-
-
-
-
-
-
-
-    //
     this.targetArray.map(v => {
-      //
       if (this.life <= 0 || v.life <= 0) {
         return;
       }
-      //
       let dist = this.position.distance(v.position);
       //
       if (dist <= (this.width + v. width) / 4) {
         //
+        if (v instanceof Viper === true) {
+          if (v.isComing === true) {
+            return;
+          }
+        }
         v.life -= this.power;
         //
         //

@@ -92,10 +92,13 @@
   let enemyShotArray = [];
   /**
    *
-   *
    */
   let explosionArray = [];
-
+  /**
+   *
+   *
+   */
+  let restart = false;
   /**
    * リソースがすべて読み込まれたら実行されるアクション
    */
@@ -151,9 +154,28 @@
     );
     viper.setShotArray(shotArray, singleShotArray);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     //
     for (i = 0; i < ENEMY_SHOT_MAX_COUNT; i++) {
       enemyShotArray[i] = new Shot(ctx, 0, 0, 32, 32, './image/enemy_shot.png');
+      enemyShotArray[i].setTargets([viper]);
+      enemyShotArray[i].setExplosions(explosionArray);
     }
 
     // 敵キャラクターを初期化
@@ -232,6 +254,12 @@
       (e) => {
         // キーが押されたことを管理しているグローバルオブジェクトにキーが押されたという状態をプロパティとしてもたせる
         isKeyDown[`key_${e.key}`] = true;
+        if (e.key === 'Enter') {
+          //
+          if (viper.life <= 0) {
+            restart = true;
+          }
+        }
       },
       false
     );
@@ -271,6 +299,36 @@
       }
       if (scene.frame === 100) {
         scene.use('invade');
+      }
+      //
+      if (viper.life <= 0) {
+        scene.use('gameover');
+      }
+    });
+    //
+    scene.add('gameover', time => {
+      //
+      let textWidth = CANVAS_WIDTH / 2;
+      //
+      let loopWidth = CANVAS_WIDTH + textWidth;
+      //
+      let x = CANVAS_WIDTH - ((scene.frame * 2) % loopWidth)
+      //
+      ctx.font = 'bold 72px sans-serif';
+      util.drawText('GAME OVER', x, CANVAS_HEIGHT / 2, 'green', textWidth);
+      //
+      if (restart === true) {
+        //
+        restart = false;
+        //
+        viper.setComing(
+          CANVAS_WIDTH / 2,
+          CANVAS_HEIGHT + 50,
+          CANVAS_WIDTH / 2,
+          CANVAS_HEIGHT - 100,
+        );
+        //
+        scene.use('intro');
       }
     });
     scene.use('intro');

@@ -19,16 +19,20 @@
    * canvasの幅
    * @type {number}
    */
-  const CANVAS_WIDTH = 400;
+  const CANVAS_WIDTH = 640;
   /**
    * canvasの高さ
    * @type {number}
    */
-  const CANVAS_HEIGHT = 620;
+  const CANVAS_HEIGHT = 480;
   /**
-   * 敵キャラクターのインスタンス数
+   * 敵キャラクター(小)のインスタンス数
    */
-  const ENEMY_MAX_COUNT = 10;
+  const ENEMY_SMALL_MAX_COUNT = 10;
+  /**
+   *
+   */
+  const ENEMY_LARGE_MAX_COUNT = 5;
   /**
    *
    */
@@ -133,7 +137,7 @@
    */
   function initialize() {
     let i;
-    canvas.window = CANVAS_WIDTH;
+    canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
 
     //
@@ -178,6 +182,8 @@
 
 
 
+
+
     //
     for (i = 0; i < ENEMY_SHOT_MAX_COUNT; i++) {
       enemyShotArray[i] = new Shot(ctx, 0, 0, 32, 32, './image/enemy_shot.png');
@@ -185,11 +191,22 @@
       enemyShotArray[i].setExplosions(explosionArray);
     }
 
-    // 敵キャラクターを初期化
-    for (i = 0; i < ENEMY_MAX_COUNT; i++) {
+    // 敵キャラクター(小)を初期化
+    for (i = 0; i < ENEMY_SMALL_MAX_COUNT; i++) {
       enemyArray[i] = new Enemy(ctx, 0, 0, 48, 48, './image/enemy_small.png');
       // 敵キャラクターはすべて同じショットを共有する
       enemyArray[i].setShotArray(enemyShotArray);
+      //
+      enemyArray[i].setAttackTarget(viper);
+    }
+
+    // 敵キャラクター(大)を初期化
+    for (i = 0; i < ENEMY_LARGE_MAX_COUNT; i++) {
+      enemyArray[ENEMY_SMALL_MAX_COUNT + i] = new Enemy(ctx, 0, 0, 64, 64, './image/enemy_large.png');
+      // 敵キャラクターはすべて同じショットを共有する
+      enemyArray[ENEMY_SMALL_MAX_COUNT + i].setShotArray(enemyShotArray);
+      //
+      enemyArray[ENEMY_SMALL_MAX_COUNT + i].setAttackTarget(viper);
     }
 
     // 衝突判定を行う対象を設定する
@@ -286,30 +303,99 @@
 
   function sceneSetting() {
     scene.add('intro', time => {
-      if (time > 2.0) {
-        scene.use('invade');
+      if (time > 3.0) {
+        scene.use('invade_default_type');
       }
     });
-    scene.add('invade', time => {
+    scene.add('invade_default_type', time => {
       //
-      if (scene.frame === 0) {
+      if (scene.frame % 30 === 0) {
         //
-        for (let i = 0; i < ENEMY_MAX_COUNT; i++) {
+        for (let i = 0; i < ENEMY_SMALL_MAX_COUNT; i++) {
           if (enemyArray[i].life <= 0) {
             let e = enemyArray[i];
-            e.set(CANVAS_WIDTH / 2, -e.height, 2, 'default');
-            e.setVector(0.0, 1.0);
+            //
+            //
+            if (scene.frame % 60 === 0) {
+              //
+              e.set(-e.width, 30, 2, 'default');
+              e.setVectorFromAngle(degreesToRadians(30));
+            } else {
+              e.set(CANVAS_WIDTH + e.width, 30, 2, 'default');
+              e.setVectorFromAngle(degreesToRadians(150));
+            }
             break;
           }
         }
 
       }
-      if (scene.frame === 100) {
-        scene.use('invade');
+      if (scene.frame === 270) {
+        scene.use('blank');
       }
       //
       if (viper.life <= 0) {
         scene.use('gameover');
+      }
+    });
+    //
+    scene.add('blank', time => {
+      //
+      if (scene.frame === 150) {
+        scene.use('invade_wave_move_type');
+      }
+      if (viper.life <= 0) {
+        scene.use('gameover');
+      }
+    });
+
+    scene.add('invade_wave_move_type', time => {
+      //
+      if (scene.frame % 50 === 0) {
+        //
+        for (let i = 0; i < ENEMY_SMALL_MAX_COUNT; i++) {
+          if (enemyArray[i].life <= 0) {
+            let e = enemyArray[i];
+            //
+            //
+            if (scene.frame <= 200) {
+              //
+              e.set(CANVAS_WIDTH * 0.2, -e.height, 2, 'wave');
+            } else {
+              //
+              e.set(CANVAS_WIDTH * 0.8, -e.height, 2, 'wave');
+
+            }
+            break;
+          }
+        }
+      }
+      //
+      if (scene.frame === 450) {
+        scene.use('invade_large_type');
+      }
+      if (viper.life <= 0) {
+        scene.use('gameover');
+      }
+    });
+    //
+    scene.add('invade_large_type', time => {
+      //
+      if (scene.frame === 100) {
+        //
+        let i = ENEMY_SMALL_MAX_COUNT + ENEMY_LARGE_MAX_COUNT;
+
+        for (let j = ENEMY_SMALL_MAX_COUNT; j < i; j++) {
+          if (enemyArray[j].life <= 0) {
+            let e = enemyArray[j];
+            //
+            e.set(CANVAS_WIDTH / 2, -e.height, 50, 'large');
+            break;
+          }
+        }
+      }
+      //
+      if (scene.frame === 500) {
+        scene.use('intro');
       }
     });
     //
@@ -408,6 +494,13 @@
     return Math.floor(random * range);
   }
 
+  /**
+   *
+   *
+   */
+  function degreesToRadians(degrees) {
+    return (degrees * Math.PI) / 180;
+  }
   /**
    *
    *

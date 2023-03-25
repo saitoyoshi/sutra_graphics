@@ -6,6 +6,27 @@ class Position {
    *
    *
    *
+   *
+   *
+   */
+  static calcLength(x, y) {
+    return Math.sqrt(x * x + y * y);
+  }
+  /**
+   *
+   *
+   *
+   *
+   *
+   */
+  static calcNormal(x, y) {
+    let len = Position.calcLength(x, y);
+    return new Position(x / len, y / len);
+  }
+  /**
+   *
+   *
+   *
    */
   constructor(x, y) {
     /**
@@ -412,16 +433,17 @@ class Enemy extends Character {
      *
      */
     this.frame = 0;
-    /**
-     *
-     *
-     */
     this.speed = 3;
     /**
      * Enemyが持っているショットのインスタンスの配列
      *
      */
     this.shotArray = null;
+    /**
+     *
+     *
+     */
+    this.attackTarget = null;
   }
 
   /**
@@ -445,6 +467,15 @@ class Enemy extends Character {
   setShotArray(shotArray) {
     this.shotArray = shotArray;
   }
+
+  /**
+   *
+   *
+   *
+   */
+  setAttackTarget(target) {
+    this.attackTarget = target;
+  }
   /**
    *
    */
@@ -454,10 +485,62 @@ class Enemy extends Character {
       return;
     }
     //
+
+
+
+
+
+
+
     switch(this.type) {
+      //
+      //
+      case 'wave':
+        //
+        if (this.frame % 60 === 0) {
+          //
+          let tx = this.attackTarget.position.x - this.position.x;
+          let ty = this.attackTarget.position.y - this.position.y;
+          //
+          let tv = Position.calcNormal(tx, ty);
+
+          this.fire(tv.x, tv.y, 4.0);
+        }
+        //
+        this.position.x += Math.sin(this.frame / 10);
+        this.position.y += 2.0;
+        //
+        if (this.position.y - this.height > this.ctx.canvas.height) {
+          this.life = 0;
+        }
+        break;
+        //
+        //
+      case 'large':
+        //
+        if (this.frame % 50 === 0) {
+          //
+          for (let i = 0; i < 360; i += 45) {
+            let r = (i * Math.PI) / 180;
+            //
+            let c = Math.cos(r);
+            let s = Math.sin(r);
+            //
+            this.fire(c, s, 3.0);
+          }
+        }
+        //
+        this.position.x += Math.sin((this.frame + 90) / 50) * 2.0;
+        this.position.y += 1.0;
+        //
+        if (this.position.y - this.height > this.ctx.canvas.height) {
+          this.life = 0;
+        }
+        break;
       case 'default':
       default:
-        if (this.frame === 50) {
+        // console.log(this.frame);
+        if (this.frame === 100) {
           this.fire();
         }
         // 敵キャラを進行方向に向かって移動させる
@@ -471,18 +554,19 @@ class Enemy extends Character {
     }
 
     //
+    this.frame++;
     this.draw();
   }
   /**
    *
    */
-  fire(x = 0.0, y = 1.0) {
+  fire(x = 0.0, y = 1.0, speed = 5.0) {
     for (let i = 0; i < this.shotArray.length; i++) {
       // ショットが死んでいるかチェック
       if (this.shotArray[i].life <= 0) {
         this.shotArray[i].set(this.position.x, this.position.y);
         //
-        this.shotArray[i].setSpeed(5.0);
+        this.shotArray[i].setSpeed(speed);
         //
         this.shotArray[i].setVector(x, y);
         //
@@ -607,10 +691,6 @@ class Shot extends Character {
       this.targetArray = targets;
     }
   }
-  /**
-   *
-   *
-   */
   setExplosions(targets) {
     if (
       targets != null &&
@@ -629,7 +709,7 @@ class Shot extends Character {
       return;
     }
     // ショットが画面外の座標になっていたら、死んでいる状態にする
-    if (this.position.y + this.height < 0 ||
+    if (this.position.x + this.width < 0 || this.position.x - this.width > this.ctx.canvas.width || this.position.y + this.height < 0 ||
       this.position.y - this.height > this.ctx.canvas.height) {
       this.life = 0;
     }
@@ -662,7 +742,12 @@ class Shot extends Character {
           }
           if (v instanceof Enemy === true) {
             //
-            gameScore = Math.min(gameScore + 100, 99999);
+            //
+            let score = 100;
+            if (v.type === 'large') {
+              score = 1000;
+            }
+            gameScore = Math.min(gameScore + score, 99999);
           }
         }
         this.life = 0;

@@ -48,6 +48,21 @@
    */
   const EXPLOSION_MAX_COUNT = 10;
   /**
+   *
+   *
+   */
+  const BACKGROUND_STAR_MAX_COUNT = 100;
+  /**
+   *
+   *
+   */
+  const BACKGROUND_STAR_MAX_SIZE = 3;
+  /**
+   *
+   *
+   */
+  const BACKGROUND_STAR_MAX_SPEED = 4;
+  /**
    * Canvas2D APIをラップしたユーティリティクラス
    * @type {Canvas2DUtility}
    */
@@ -105,6 +120,11 @@
    *
    */
   let explosionArray = [];
+  /**
+   *
+   *
+   */
+  let backgroundStarArray = [];
   /**
    *
    *
@@ -228,7 +248,18 @@
 
 
 
-
+    //
+    for (i = 0; i < BACKGROUND_STAR_MAX_COUNT; i++) {
+      //
+      let size = 1 + Math.random() * (BACKGROUND_STAR_MAX_SIZE - 1);
+      let speed = 1 + Math.random() * (BACKGROUND_STAR_MAX_SPEED - 1);
+      //
+      backgroundStarArray[i] = new BackgroundStar(ctx, size, speed);
+      //
+      let x = Math.random() * CANVAS_WIDTH;
+      let y = Math.random() * CANVAS_HEIGHT;
+      backgroundStarArray[i].set(x, y);
+    }
   }
 
   /**
@@ -431,16 +462,29 @@
     scene.use('intro');
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   function render() {
     // キャンバス描画を完全な不透明にする
     ctx.globalAlpha = 1.0;
     //
     util.drawRect(0, 0, canvas.width, canvas.height, "black");
-
-
-
-
-
 
     // 現在までの経過時間を取得
     let nowTime = (Date.now() - startTime) / 1000;
@@ -449,6 +493,11 @@
     ctx.font = 'bold 24px monospace';
     util.drawText(zeroPadding(gameScore, 5), 30, 50, '#111111');
     scene.update();
+
+    //
+    backgroundStarArray.map(v => {
+      v.update();
+    });
     // viperを更新して描画
     viper.update();
 

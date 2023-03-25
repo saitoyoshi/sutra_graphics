@@ -131,6 +131,11 @@
    */
   let restart = false;
   /**
+   *
+   *
+   */
+  let sound = null;
+  /**
    * リソースがすべて読み込まれたら実行されるアクション
    */
   window.addEventListener(
@@ -139,15 +144,42 @@
       // ユーティリティクラスを使えるために準備する
       util = new Canvas2DUtility(document.querySelector("#main_canvas"));
       // ユーティリティクラスからHTMLcanvasElementへの参照を取得
+
+
+
       canvas = util.canvas;
       // 2Dレンダリングコンテキストを取得
       ctx = util.context;
+      //
+      canvas.width = CANVAS_WIDTH;
+      canvas.height = CANVAS_HEIGHT;
 
       //
-      initialize();
+      let button = document.querySelector('#start_button');
       //
-      // インスタンスが読み込まれているか状態を確認する
-      loadCheck();
+      button.addEventListener(
+        'click',
+        () => {
+          //
+          button.disabled = true;
+          //
+          sound = new Sound();
+          //
+          sound.load('./sound/explosion.mp3', (error) => {
+            //
+            if (error != null) {
+              alert('ファイルの読み込みエラーです');
+              return;
+            }
+          });
+          initialize();
+          //
+          // インスタンスが読み込まれているか状態を確認する
+          loadCheck();
+        },
+        false,
+      );
+      //
     },
     false
   );
@@ -157,13 +189,13 @@
    */
   function initialize() {
     let i;
-    canvas.width = CANVAS_WIDTH;
-    canvas.height = CANVAS_HEIGHT;
 
     //
     scene = new SceneManager();
     for (i = 0; i < EXPLOSION_MAX_COUNT; i++) {
       explosionArray[i] = new Explosion(ctx, 100.0, 15, 40.0, 1.0);
+      //
+      explosionArray[i].setSound(sound);
     }
 
 

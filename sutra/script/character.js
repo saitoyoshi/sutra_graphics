@@ -831,6 +831,11 @@ class Explosion {
      *
      */
     this.fireVector = [];
+    /**
+     *
+     *
+     */
+    this.sound = null;
   }
 
   /**
@@ -858,6 +863,19 @@ class Explosion {
     this.life = true;
     //
     this.startTime = Date.now();
+
+    //
+    if (this.sound != null) {
+      this.sound.play();
+    }
+
+  }
+
+  /**
+   *
+   */
+  setSound(sound) {
+    this.sound = sound;
   }
 
   /**

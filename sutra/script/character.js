@@ -269,6 +269,7 @@ class Viper extends Character {
      *
      */
     this.singleShotArray = null;
+    this.superShotArray = null;
   }
 
   /**
@@ -296,9 +297,10 @@ class Viper extends Character {
   /**
    * viperがショットを打てるように設定する
    */
-  setShotArray(shotArray, singleShotArray) {
+  setShotArray(shotArray, singleShotArray, superShotArray) {
     this.shotArray = shotArray;
     this.singleShotArray = singleShotArray;
+    this.superShotArray = superShotArray;
   }
   /**
    * 画面オブジェクトを更新したのちに描画する
@@ -379,7 +381,7 @@ class Viper extends Character {
               this.shotArray[i].set(this.position.x, this.position.y);
               this.shotArray[i].setPower(2);
               // ショットを生成したので、次のショットを打てるまでの間隔を設定する
-              this.shotCheckCounter =  -this.shotInterval;
+              this.shotCheckCounter = -this.shotInterval;
               // ひとつ作ったらループを抜ける
               break;
             }
@@ -399,6 +401,24 @@ class Viper extends Character {
               // ショットをつくったので、次のショットが作れるまでの間隔をつくる
               this.shotCheckCounter = -this.shotInterval;
               // 一組生成したら、ループを抜ける
+              break;
+            }
+          }
+        }
+      }
+      // スーパーショットを発射する
+      if (window.isKeyDown.key_x === true) {
+        if (this.shotCheckCounter >= 0) {
+          for (let i = 0; i < this.superShotArray.length; i++) {
+            console.warn(this.superShotArray);
+            // 死んでるか確認する
+            if (this.superShotArray[i].life <= 0) {
+              // viperのいる座標（場所）にショットを生成する
+              this.superShotArray[i].set(this.position.x, this.position.y);
+              this.superShotArray[i].setPower(30);
+              // ショットを生成したので、次のショットを打てるまでの間隔を設定する
+              this.shotCheckCounter = -this.shotInterval;
+              // ひとつ作ったらループを抜ける
               break;
             }
           }
@@ -880,6 +900,11 @@ class Shot extends Character {
   }
 }
 
+class SuperShot extends Shot {
+  constructor(ctx, x, y, w, h, imagePath) {
+    super(ctx, x, y, w, h, imagePath);
+  }
+}
 /**
  *
  */

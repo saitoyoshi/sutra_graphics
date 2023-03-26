@@ -37,6 +37,7 @@
    *
    */
   const SHOT_MAX_COUNT = 10;
+  const SUPER_SHOT_MAX_COUNT = 2;
   /**
    *
    *
@@ -121,6 +122,7 @@
 
 
   let singleShotArray = [];
+  let superShotArray = [];
   /**
    *
    *
@@ -222,6 +224,10 @@
       singleShotArray[i * 2] = new Shot(ctx, 0, 0, 32, 32, './image/viper_single_shot.png');
       singleShotArray[i * 2 + 1] = new Shot(ctx, 0, 0, 32, 32, './image/viper_single_shot.png');
     }
+    for (i = 0; i < SUPER_SHOT_MAX_COUNT; i++) {
+      // todo:いずれはスーパーショット用の画像も用意する
+      superShotArray[i] = new SuperShot(ctx, 0, 0, 64, 64, './image/viper_shot.png');
+    }
     viper = new Viper(ctx, 0, 0, 64, 64, './image/viper.png');
     // 登場シーンから開始させる
     viper.setComing(
@@ -230,7 +236,7 @@
       CANVAS_WIDTH / 2,
       CANVAS_HEIGHT - 100
     );
-    viper.setShotArray(shotArray, singleShotArray);
+    viper.setShotArray(shotArray, singleShotArray, superShotArray);
 
 
 
@@ -296,7 +302,10 @@
       singleShotArray[i * 2].setExplosions(explosionArray);
       singleShotArray[i * 2 + 1].setExplosions(explosionArray);
     }
-
+    for (i = 0; i < SUPER_SHOT_MAX_COUNT; i++) {
+      superShotArray[i].setTargets(concatEnemyArray);
+      superShotArray[i].setExplosions(explosionArray);
+    }
 
 
 
@@ -584,6 +593,10 @@
     });
     //
     singleShotArray.map(v => {
+      v.update();
+    });
+
+    superShotArray.map(v => {
       v.update();
     });
 

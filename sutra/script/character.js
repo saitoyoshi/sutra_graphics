@@ -450,17 +450,9 @@ class Enemy extends Character {
      *
      */
     this.shotArray = null;
-    /**
-     *
-     *
-     */
     this.attackTarget = null;
   }
 
-  /**
-   *
-   *
-   */
   set(x, y, life = 1, type = 'default') {
     this.position.set(x, y);
     // 敵キャラクターを生きている状態で配置
@@ -479,33 +471,16 @@ class Enemy extends Character {
     this.shotArray = shotArray;
   }
 
-  /**
-   *
-   *
-   *
-   */
   setAttackTarget(target) {
     this.attackTarget = target;
   }
-  /**
-   *
-   */
   update() {
     // 死んでればなにもしない
     if (this.life <= 0) {
       return;
     }
     //
-
-
-
-
-
-
-
     switch(this.type) {
-      //
-      //
       case 'wave':
         //
         if (this.frame % 60 === 0) {
@@ -525,8 +500,6 @@ class Enemy extends Character {
           this.life = 0;
         }
         break;
-        //
-        //
       case 'large':
         //
         if (this.frame % 50 === 0) {
@@ -544,6 +517,17 @@ class Enemy extends Character {
         this.position.x += Math.sin((this.frame + 90) / 50) * 2.0;
         this.position.y += 1.0;
         //
+        if (this.position.y - this.height > this.ctx.canvas.height) {
+          this.life = 0;
+        }
+        break;
+      case 'horizontal':
+        if (this.frame % 50 === 0) {
+          this.fire();
+        }
+        // 敵キャラを進行方向に向かって移動させる
+        this.position.y += 1.5;
+      // 画面外にでていたら死んでいる状態にする
         if (this.position.y - this.height > this.ctx.canvas.height) {
           this.life = 0;
         }

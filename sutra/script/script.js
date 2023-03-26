@@ -435,7 +435,36 @@
       }
       // todo:ここに横一列の小エネミーのシーン追加 scene.add('new scene'),
       // scene.use('invade_large)->ここに入れる、入れた中で、scene.use('invade_large_type');すればいい
-      if (scene.frame === 450) {
+      if (scene.frame === 500) {
+        scene.use('blank2');
+      }
+      if (viper.life <= 0) {
+        scene.use('gameover');
+      }
+    });
+    scene.add('blank2', time => {
+      //
+      if (scene.frame === 250) {
+        scene.use('invade_horizontal_attack');
+      }
+      if (viper.life <= 0) {
+        scene.use('gameover');
+      }
+    });
+    scene.add('invade_horizontal_attack', time => {
+      if (scene.frame % 5 === 0) {
+        // console.warn(scene.frame);
+        const pivotX = CANVAS_WIDTH / ENEMY_SMALL_MAX_COUNT;
+        for (let i = 0; i < ENEMY_SMALL_MAX_COUNT; i++) {
+          if (enemyArray[i].life <= 0) {
+            let e = enemyArray[i];
+            e.set(pivotX * i, -e.height, 5, 'horizontal');
+            // console.log(e);
+            break;
+          }
+        }
+      }
+      if (scene.frame === 500) {
         scene.use('invade_large_type');
       }
       if (viper.life <= 0) {

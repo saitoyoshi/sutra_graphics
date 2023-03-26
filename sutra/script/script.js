@@ -7,13 +7,6 @@
    * @type {object}
    */
   window.isKeyDown = {};
-  /**
-   *
-   *
-   *
-   *
-   *
-   */
   window.gameScore = 0
   /**
    * canvasの幅
@@ -285,15 +278,6 @@
       superShotArray[i].setTargets(concatEnemyArray);
       superShotArray[i].setExplosions(explosionArray);
     }
-
-
-
-
-
-
-
-
-    //
     for (i = 0; i < BACKGROUND_STAR_MAX_COUNT; i++) {
       //
       let size = 1 + Math.random() * (BACKGROUND_STAR_MAX_SIZE - 1);
@@ -361,7 +345,6 @@
           // キーが押されたことを管理しているグローバルオブジェクトにキーが押されたという状態をプロパティとしてもたせる
           isKeyDown[`key_${e.key}`] = true;
 
-
           if (e.key === 'Enter') {
             //
             if (viper.life <= 0) {
@@ -412,7 +395,6 @@
             break;
           }
         }
-
       }
       if (scene.frame === 270) {
         scene.use('blank');
@@ -440,21 +422,19 @@
         for (let i = 0; i < ENEMY_SMALL_MAX_COUNT; i++) {
           if (enemyArray[i].life <= 0) {
             let e = enemyArray[i];
-            //
-            //
             if (scene.frame <= 200) {
               //
               e.set(CANVAS_WIDTH * 0.2, -e.height, 2, 'wave');
             } else {
               //
               e.set(CANVAS_WIDTH * 0.8, -e.height, 2, 'wave');
-
             }
             break;
           }
         }
       }
-      //
+      // todo:ここに横一列の小エネミーのシーン追加 scene.add('new scene'),
+      // scene.use('invade_large)->ここに入れる、入れた中で、scene.use('invade_large_type');すればいい
       if (scene.frame === 450) {
         scene.use('invade_large_type');
       }

@@ -90,17 +90,9 @@ class Position {
  */
 class Character {
   /**
-   *
-   *
-   *
-   *
-   *
    * @param {string}}imagePath 画面オブジェクト（キャラクター）の画像のパス
    */
   constructor(ctx, x, y, w, h, life, imagePath) {
-    /**
-     *
-     */
     this.ctx = ctx;
     /**
      * 画面上のオブジェクトの存在する座標
@@ -210,6 +202,7 @@ class Character {
  * 自分機クラス viperはシューティングゲームの主人公としての山田太郎的な名前である
  */
 class Viper extends Character {
+  static GOD_MODE_SCALE = 1.7;
   constructor(ctx, x, y, w, h, imagePath) {
     //
     // インスタンス化したときには、ライフは画面に描画されないためのフラグとして,0を与える
@@ -269,13 +262,29 @@ class Viper extends Character {
     //
     this.comingEndPosition = new Position(endX, endY);
   }
-
+  getWidth() {
+    return this.width;
+  }
+  setWidth(width) {
+    this.width = width;
+  }
+  getHeight() {
+    return this.height;
+  }
+  setHeight(height) {
+    this.height = height;
+  }
   toggleGotMode() {
     this.isGotMode = !this.isGotMode;
     if (this.isGotMode === true) {
       console.warn("Got mode");
+      this.setHeight(this.getHeight() * this.constructor.GOD_MODE_SCALE);
+      this.setWidth(this.getWidth() * this.constructor.GOD_MODE_SCALE);
+      console.log(this);
     } else {
       console.warn("Not Got mode");
+      this.setHeight(this.getHeight() / this.constructor.GOD_MODE_SCALE);
+      this.setWidth(this.getWidth() / this.constructor.GOD_MODE_SCALE);
     }
   }
   /**
@@ -426,13 +435,6 @@ class Viper extends Character {
  *
  */
 class Enemy extends Character {
-  /**
-   *
-   *
-   *
-   *
-   *
-   */
   constructor(ctx, x, y, w, h, imagePath) {
     super(ctx, x, y, w, h, 0, imagePath);
 
@@ -687,12 +689,6 @@ class Boss extends Character {
  *
  */
 class Shot extends Character {
-  /**
-   *
-   *
-   *
-   *
-   */
   constructor(ctx, x, y, w, h, imagePath) {
     super(ctx, x, y, w, h, 0, imagePath);
 
@@ -1059,6 +1055,9 @@ class Homing extends Shot {
       if (dist <= (this.width + v.width) / 4) {
         if (v instanceof Viper === true) {
           if (v.isComing === true) {
+            return;
+          }
+          if (v.isGotMode === true) {
             return;
           }
         }

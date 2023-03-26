@@ -89,7 +89,6 @@
    */
   // 実行開始時のタイスタンプ
   let startTime = null;
-  let comingStart = null;
   /**
    *
    *
@@ -206,7 +205,6 @@
    */
   function initialize() {
     let i;
-
     //
     scene = new SceneManager();
     for (i = 0; i < EXPLOSION_MAX_COUNT; i++) {
@@ -214,10 +212,6 @@
       //
       explosionArray[i].setSound(sound);
     }
-
-
-
-    //
     // ショットを初期化する
     for (i = 0; i < SHOT_MAX_COUNT; i++) {
       shotArray[i] = new Shot(ctx, 0, 0, 32, 32, './image/viper_shot.png');
@@ -237,21 +231,6 @@
       CANVAS_HEIGHT - 100
     );
     viper.setShotArray(shotArray, singleShotArray, superShotArray);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     for (i = 0; i < ENEMY_SHOT_MAX_COUNT; i++) {
       enemyShotArray[i] = new Shot(ctx, 0, 0, 32, 32, './image/enemy_shot.png');
@@ -376,12 +355,18 @@
     window.addEventListener(
       "keydown",
       (e) => {
-        // キーが押されたことを管理しているグローバルオブジェクトにキーが押されたという状態をプロパティとしてもたせる
-        isKeyDown[`key_${e.key}`] = true;
-        if (e.key === 'Enter') {
-          //
-          if (viper.life <= 0) {
-            restart = true;
+        if (e.key === 'Shift') {
+          viper.toggleGotMode();
+        } else {
+          // キーが押されたことを管理しているグローバルオブジェクトにキーが押されたという状態をプロパティとしてもたせる
+          isKeyDown[`key_${e.key}`] = true;
+
+
+          if (e.key === 'Enter') {
+            //
+            if (viper.life <= 0) {
+              restart = true;
+            }
           }
         }
       },

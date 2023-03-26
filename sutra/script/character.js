@@ -210,15 +210,6 @@ class Character {
  * 自分機クラス viperはシューティングゲームの主人公としての山田太郎的な名前である
  */
 class Viper extends Character {
-  /**
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   */
   constructor(ctx, x, y, w, h, imagePath) {
     //
     // インスタンス化したときには、ライフは画面に描画されないためのフラグとして,0を与える
@@ -239,11 +230,8 @@ class Viper extends Character {
      *
      */
     this.shotInterval = 10;
-    /**
-     *
-     *
-     */
     this.isComing = false;
+    this.isGotMode = false;
     /**
      *
      * 登場開始シーンが始まったときのタイムスタンプ
@@ -259,25 +247,13 @@ class Viper extends Character {
      * 登場シーンが終わるときにviperの座標
      */
     this.comingEndPosition = null;
-    /**
-     *
-     *
-     */
     this.shotArray = null;
-    /**
-     *
-     *
-     */
     this.singleShotArray = null;
     this.superShotArray = null;
   }
 
   /**
    * 登場シーンに関する設定を行う
-   *
-   *
-   *
-   *
    */
   setComing(startX, startY, endX, endY) {
     //
@@ -294,6 +270,14 @@ class Viper extends Character {
     this.comingEndPosition = new Position(endX, endY);
   }
 
+  toggleGotMode() {
+    this.isGotMode = !this.isGotMode;
+    if (this.isGotMode === true) {
+      console.warn("Got mode");
+    } else {
+      console.warn("Not Got mode");
+    }
+  }
   /**
    * viperがショットを打てるように設定する
    */
@@ -305,19 +289,6 @@ class Viper extends Character {
   /**
    * 画面オブジェクトを更新したのちに描画する
    */
-
-
-
-
-
-
-
-
-
-
-
-
-
   update() {
     //
     if (this.life <= 0) {
@@ -410,7 +381,6 @@ class Viper extends Character {
       if (window.isKeyDown.key_x === true) {
         if (this.shotCheckCounter >= 0) {
           for (let i = 0; i < this.superShotArray.length; i++) {
-            console.warn(this.superShotArray);
             // 死んでるか確認する
             if (this.superShotArray[i].life <= 0) {
               // viperのいる座標（場所）にショットを生成する
@@ -680,7 +650,6 @@ class Boss extends Character {
         } else {
           if (this.frame % 50 === 0) {
             this.homingFire(0, 1, 3.5);
-            console.warn('hey');
           }
         }
         this.position.x += Math.cos(this.frame / 100) * 2.0;
@@ -741,42 +710,6 @@ class Shot extends Character {
      *
      */
     this.targetArray = [];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      *
      * 爆発エフェクトのインスタンスを格納する
@@ -864,6 +797,9 @@ class Shot extends Character {
         //
         if (v instanceof Viper === true) {
           if (v.isComing === true) {
+            return;
+          }
+          if (v.isGotMode === true) {
             return;
           }
         }
